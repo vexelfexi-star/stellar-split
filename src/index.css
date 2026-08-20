@@ -1,0 +1,589 @@
+/* ============================================================
+   Design tokens — "counter receipt" system
+   ============================================================ */
+:root {
+  --paper: #f1ecde;
+  --paper-deep: #e3ddc8;
+  --paper-shadow: #cfc7ab;
+  --ink: #1b1a2e;
+  --ink-soft: #58546f;
+  --ink-faint: #8b87a0;
+  --accent: #5b49e8;
+  --accent-dim: #ece9fb;
+  --stamp-green: #2f7d4f;
+  --stamp-green-bg: #e5f2e9;
+  --stamp-red: #b23a2e;
+  --stamp-red-bg: #f7e7e4;
+  --gold: #c89b3c;
+
+  --font-display: "Fraunces", "Iowan Old Style", serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+  --font-body: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+
+  --tape-width: 460px;
+  --radius-sm: 3px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  min-height: 100vh;
+  background: var(--ink);
+  background-image: radial-gradient(
+      circle at 20% 15%,
+      rgba(217, 164, 65, 0.09),
+      transparent 40%
+    ),
+    radial-gradient(circle at 80% 85%, rgba(91, 73, 232, 0.14), transparent 45%);
+  font-family: var(--font-body);
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+}
+
+#root {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  padding: 64px 20px 96px;
+}
+
+button {
+  font-family: inherit;
+}
+
+:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+/* ============================================================
+   The receipt tape
+   ============================================================ */
+
+.tape-wrap {
+  width: 100%;
+  max-width: var(--tape-width);
+}
+
+.constellation-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 28px;
+  color: var(--paper-deep);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  opacity: 0.75;
+}
+
+.constellation-header .dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--gold);
+  box-shadow: 0 0 6px 1px rgba(200, 155, 60, 0.7);
+}
+
+.receipt {
+  position: relative;
+  background: var(--paper);
+  color: var(--ink);
+  padding: 8px 0 30px;
+  box-shadow: 0 30px 60px -20px rgba(0, 0, 0, 0.55), 0 2px 0 rgba(0, 0, 0, 0.05);
+  background-image: repeating-linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0.018) 0px,
+    rgba(0, 0, 0, 0.018) 1px,
+    transparent 1px,
+    transparent 3px
+  );
+}
+
+.receipt::before,
+.receipt::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 12px;
+  background-image: linear-gradient(-45deg, var(--paper) 6px, transparent 0),
+    linear-gradient(45deg, var(--paper) 6px, transparent 0);
+  background-size: 12px 12px;
+  background-repeat: repeat-x;
+  background-position: left top;
+}
+
+.receipt::before {
+  top: -11px;
+}
+
+.receipt::after {
+  bottom: -11px;
+  transform: rotate(180deg);
+}
+
+.receipt-inner {
+  padding: 26px 30px 6px;
+}
+
+/* ---- typography helpers ---- */
+
+.mark {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 450;
+  font-size: 34px;
+  letter-spacing: -0.01em;
+  text-align: center;
+  margin: 6px 0 2px;
+}
+
+.mark strong {
+  font-style: normal;
+  font-weight: 600;
+}
+
+.sub {
+  text-align: center;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  margin-bottom: 20px;
+}
+
+.eyebrow {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  margin: 0 0 10px;
+}
+
+.perf {
+  border: none;
+  border-top: 1.5px dashed var(--paper-shadow);
+  margin: 22px 0;
+}
+
+/* ---- line item rows (dot-leader receipt lines) ---- */
+
+.line {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  font-family: var(--font-mono);
+  font-size: 13.5px;
+  line-height: 1.9;
+}
+
+.line .label {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: clip;
+}
+
+.line .leader {
+  flex: 1;
+  border-bottom: 1.5px dotted var(--paper-shadow);
+  transform: translateY(-4px);
+  min-width: 12px;
+}
+
+.line .value {
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.line.total .value,
+.line.total .label {
+  font-weight: 700;
+  font-size: 15px;
+}
+
+.line.muted {
+  color: var(--ink-faint);
+}
+
+/* ---- wallet status row ---- */
+
+.wallet-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.wallet-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+}
+
+.pulse {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--ink-faint);
+  flex-shrink: 0;
+}
+
+.pulse.live {
+  background: var(--stamp-green);
+  animation: pulse-live 2.4s infinite;
+}
+
+@keyframes pulse-live {
+  0% {
+    box-shadow: 0 0 0 0 rgba(47, 125, 79, 0.45);
+  }
+  70% {
+    box-shadow: 0 0 0 7px rgba(47, 125, 79, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(47, 125, 79, 0);
+  }
+}
+
+.addr {
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  letter-spacing: 0.01em;
+}
+
+/* ---- buttons ---- */
+
+.btn {
+  appearance: none;
+  border: 1.5px solid var(--ink);
+  background: transparent;
+  color: var(--ink);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 9px 14px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease, transform 0.1s ease;
+}
+
+.btn:hover {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+.btn:active {
+  transform: scale(0.97);
+}
+
+.btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.btn:disabled:hover {
+  background: transparent;
+  color: var(--ink);
+}
+
+.btn-primary {
+  width: 100%;
+  background: var(--ink);
+  color: var(--paper);
+  border-color: var(--ink);
+  padding: 14px 14px;
+  font-size: 13px;
+  letter-spacing: 0.1em;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
+.btn-ghost {
+  border-color: var(--paper-shadow);
+  color: var(--ink-soft);
+}
+
+.btn-ghost:hover {
+  background: var(--ink-soft);
+  border-color: var(--ink-soft);
+  color: var(--paper);
+}
+
+/* ---- form fields ---- */
+
+.field {
+  margin-bottom: 12px;
+}
+
+.field label {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  margin-bottom: 5px;
+}
+
+.field input {
+  width: 100%;
+  border: 1.5px solid var(--paper-shadow);
+  background: #fbf9f2;
+  border-radius: var(--radius-sm);
+  padding: 9px 10px;
+  font-family: var(--font-mono);
+  font-size: 13.5px;
+  color: var(--ink);
+}
+
+.field input::placeholder {
+  color: var(--ink-faint);
+}
+
+.field input:focus {
+  border-color: var(--accent);
+}
+
+.row-2 {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 8px;
+  align-items: end;
+}
+
+/* ---- participant list ---- */
+
+.participants {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.participant-row {
+  display: grid;
+  grid-template-columns: 1fr 76px auto;
+  gap: 8px;
+  align-items: center;
+}
+
+.participant-row input {
+  border: 1.5px solid var(--paper-shadow);
+  background: #fbf9f2;
+  border-radius: var(--radius-sm);
+  padding: 7px 9px;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--ink);
+  width: 100%;
+}
+
+.participant-row input:focus {
+  border-color: var(--accent);
+}
+
+.icon-btn {
+  border: none;
+  background: transparent;
+  color: var(--ink-faint);
+  cursor: pointer;
+  font-family: var(--font-mono);
+  font-size: 15px;
+  padding: 4px 8px;
+  line-height: 1;
+  border-radius: var(--radius-sm);
+}
+
+.icon-btn:hover {
+  color: var(--stamp-red);
+  background: var(--stamp-red-bg);
+}
+
+.add-row {
+  background: none;
+  border: 1.5px dashed var(--paper-shadow);
+  color: var(--ink-soft);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.05em;
+  padding: 8px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  width: 100%;
+}
+
+.add-row:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+/* ---- typewriter reveal for freshly-printed lines ---- */
+
+@keyframes print-in {
+  from {
+    opacity: 0;
+    transform: translateY(-3px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.print-in {
+  animation: print-in 0.28s ease both;
+}
+
+/* ---- error / hint text ---- */
+
+.hint {
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  color: var(--ink-faint);
+  margin-top: 6px;
+}
+
+.error-text {
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  color: var(--stamp-red);
+  background: var(--stamp-red-bg);
+  border: 1px solid rgba(178, 58, 46, 0.25);
+  padding: 8px 10px;
+  border-radius: var(--radius-sm);
+  margin-top: 10px;
+}
+
+/* ---- stamp (transaction result) ---- */
+
+.stamp-area {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 10px 0 4px;
+}
+
+.stamp {
+  border: 3px solid var(--stamp-green);
+  color: var(--stamp-green);
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 20px;
+  letter-spacing: 0.14em;
+  padding: 8px 20px;
+  border-radius: 6px;
+  transform: rotate(-4deg) scale(1);
+  opacity: 1;
+  animation: stamp-down 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  position: relative;
+}
+
+.stamp::after {
+  content: "";
+  position: absolute;
+  inset: 3px;
+  border: 1px solid var(--stamp-green);
+  border-radius: 3px;
+  opacity: 0.5;
+}
+
+.stamp.failed {
+  border-color: var(--stamp-red);
+  color: var(--stamp-red);
+}
+
+.stamp.failed::after {
+  border-color: var(--stamp-red);
+}
+
+@keyframes stamp-down {
+  0% {
+    opacity: 0;
+    transform: rotate(-4deg) scale(2.4);
+  }
+  60% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 1;
+    transform: rotate(-4deg) scale(1);
+  }
+}
+
+.tx-hash {
+  margin-top: 12px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--ink-soft);
+  text-align: center;
+  word-break: break-all;
+}
+
+.tx-hash a {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.tx-hash a:hover {
+  text-decoration: underline;
+}
+
+.qr-wrap {
+  margin-top: 14px;
+  display: flex;
+  justify-content: center;
+  padding: 10px;
+  background: #fff;
+  border: 1px solid var(--paper-shadow);
+  border-radius: var(--radius-sm);
+}
+
+.footer-note {
+  text-align: center;
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  color: rgba(241, 236, 222, 0.4);
+  margin-top: 22px;
+  letter-spacing: 0.06em;
+}
+
+.footer-note a {
+  color: rgba(241, 236, 222, 0.65);
+}
+
+@media (max-width: 480px) {
+  .receipt-inner {
+    padding: 22px 18px 4px;
+  }
+}
